@@ -173,3 +173,54 @@ void mymemory_display(mymemory_t *memory){
 		printf("(nao alocado) start %p [  %zu  ]\n", previousEnd, rBlock);
 	}
 }
+
+void mymemory_stats(mymemory_t *memory)
+{
+	if (memory == NULL)
+		return;
+
+	char *pool_end  = (char *)memory->pool + memory->total_size;
+	char *gap_start = (char *)memory->pool;
+
+	size_t total_alloc   = 0;
+	size_t total_free    = 0;
+	size_t largest_free  = 0;
+	size_t num_allocs    = 0;
+	size_t num_fragments = 0;
+
+	allocation_t *curr = memory->head;
+
+	// buracos antes de cada bloco alocado
+	while (curr != NULL) {
+		size_t gap = (size_t)((char *)curr->start - gap_start);
+
+		if (gap > 0) {
+			total_free += gap;
+			num_fragments++;
+			if (gap > largest_free)
+				largest_free = gap;
+		}
+
+		total_alloc += curr->size;
+		num_allocs++;
+
+		gap_start = (char *)curr->start + curr->size;
+		curr = curr->next;
+	}
+
+	// buraco final: entre o último bloco e o fim do pool
+	size_t last_gap = (size_t)(pool_end - gap_start);
+	if (last_gap > 0) {
+		total_free += last_gap;
+		num_fragments++;
+		if (last_gap > largest_free)
+			largest_free = last_gap;
+	}
+
+	printf("--- Estatisticas ---\n");
+	printf("Alocacoes ativas      : %zu\n", num_allocs);
+	printf("Memoria alocada       : %zu bytes\n", total_alloc);
+	printf("Memoria livre         : %zu bytes\n", total_free);
+	printf("Maior bloco livre     : %zu bytes\n", largest_free);
+	printf("Fragmentos livres     : %zu\n", num_fragments);
+}
