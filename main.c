@@ -7,26 +7,18 @@ int main()
 	// aloca pool memoria
 	mymemory_t *memory = mymemory_init(1000);
 
-	mymemory_alloc(memory, 128); 
-	mymemory_alloc(memory, 256); 
+	void *a = mymemory_alloc(memory, 128);   // 0
+	void *b = mymemory_alloc(memory, 256);   // 128
+	void *c = mymemory_alloc(memory, 700);   // NULL
+	void *d = mymemory_alloc(memory, 616);   // 384
+	void *e = mymemory_alloc(memory, 1);     // NULL (pool cheio)
+	
+	printf("a: %td\n", a ? (char*)a - (char*)memory->pool : -1);
+	printf("b: %td\n", b ? (char*)b - (char*)memory->pool : -1);
+	printf("c: %td\n", c ? (char*)c - (char*)memory->pool : -1);
+	printf("d: %td\n", d ? (char*)d - (char*)memory->pool : -1);
+	printf("e: %td\n", e ? (char*)e - (char*)memory->pool : -1);
 
-	//int v[32];
-	// int *v = malloc(sizeof(int)*32);
-	/*
-    int *v = mymemory_alloc(memory, sizeof(int)*32);
-    for (int i = 0; i < 32; i++)
-	v[i] = i+1;
-
-
-    int *v2 = mymemory_alloc(memory, sizeof(int)*16);
-
-    // free(v);
-    mymemory_free(memory, v);
-
-    char *str = mymemory_alloc(memory, sizeof(char)*16);
-    sprintf(str, "ola mundo");
-	*/
-	// libera o pool de memoria
 	mymemory_cleanup(memory);
 
 	return 0;
