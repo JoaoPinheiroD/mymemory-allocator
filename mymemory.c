@@ -145,34 +145,31 @@ void mymemory_display(mymemory_t *memory){
 		return;
 	}
 
+	char* pool = (char*)memory->pool;
+	char* previousEnd = pool;
 	allocation_t* current = memory->head;
-	allocation_t* previous = memory->head;
 
-	if(current->start != memory->pool){
-		size_t iBlock = (char*)memory->head->start - (char*)memory->pool; 
-		printf("(nao alocado) [  %td  ]\n", iBlock);
-	}
+	while(current != NULL){
+		size_t gap = (size_t)((char*)current->start - previousEnd);
 
-	while(current->next != NULL){
-		printf("(alocado) [  %td  ]\n", current->size);
-
-		current = current->next;
-
-		size_t fBlock = (char*)current->start - ((char*)previous->start + previous->size);
-
-		if(fBlock > 0){
-			printf("(nao alocado) [  %td  ]\n", fBlock);
+		if(gap > 0){
+			printf("(nao alocado) start %p [  %zu  ]\n", previousEnd, gap);
 		}
 
-		previous = current;
+		char* currentEnd = (char*)current->start + current->size;
+		size_t aBlock = current->size; 
+
+		if(aBlock > 0){
+			printf("(alocado) start %p [  %zu  ]\n", current->start, aBlock);
+		}
+
+		previousEnd = currentEnd;
+		current = current->next;
 	}
 
-	printf("(alocado) [  %td  ]\n", current->size);
-
-	size_t rBlock = ((char*)memory->pool + memory->total_size) - ((char*)current->start + current->size);
+	size_t rBlock = (size_t)(pool + memory->total_size) - (size_t)previousEnd;
 
 	if(rBlock > 0){
-		printf("(nao alocado) [  %td  ]\n", current->size);
+		printf("(nao alocado) start %p [  %zu  ]\n", previousEnd, rBlock);
 	}
 }
-
