@@ -140,3 +140,39 @@ void mymemory_free(mymemory_t *memory, void *ptr){
 	free(current);
 }
 
+void mymemory_display(mymemory_t *memory){
+	if(memory == NULL){
+		return;
+	}
+
+	allocation_t* current = memory->head;
+	allocation_t* previous = memory->head;
+
+	if(current->start != memory->pool){
+		size_t iBlock = (char*)memory->head->start - (char*)memory->pool; 
+		printf("(nao alocado) [  %td  ]\n", iBlock);
+	}
+
+	while(current->next != NULL){
+		printf("(alocado) [  %td  ]\n", current->size);
+
+		current = current->next;
+
+		size_t fBlock = (char*)current->start - ((char*)previous->start + previous->size);
+
+		if(fBlock > 0){
+			printf("(nao alocado) [  %td  ]\n", fBlock);
+		}
+
+		previous = current;
+	}
+
+	printf("(alocado) [  %td  ]\n", current->size);
+
+	size_t rBlock = ((char*)memory->pool + memory->total_size) - ((char*)current->start + current->size);
+
+	if(rBlock > 0){
+		printf("(nao alocado) [  %td  ]\n", current->size);
+	}
+}
+
