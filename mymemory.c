@@ -174,13 +174,10 @@ void mymemory_display(mymemory_t *memory){
 	}
 }
 
-void mymemory_stats(mymemory_t *memory)
-{
-	if (memory == NULL)
+void mymemory_stats(mymemory_t *memory){
+	if(memory == NULL){
 		return;
-
-	char *pool_end  = (char *)memory->pool + memory->total_size;
-	char *gap_start = (char *)memory->pool;
+	}
 
 	size_t total_alloc   = 0;
 	size_t total_free    = 0;
@@ -188,36 +185,46 @@ void mymemory_stats(mymemory_t *memory)
 	size_t num_allocs    = 0;
 	size_t num_fragments = 0;
 
-	allocation_t *curr = memory->head;
+	char* pool = (char*)memory->pool;
+	char* previousEnd = pool;
+	allocation_t* current = memory->head;
 
-	// buracos antes de cada bloco alocado
-	while (curr != NULL) {
-		size_t gap = (size_t)((char *)curr->start - gap_start);
+	while(current != NULL){
+		size_t gap = (size_t)((char*)current->start - previousEnd);
 
-		if (gap > 0) {
+		if(gap > 0){
 			total_free += gap;
 			num_fragments++;
-			if (gap > largest_free)
+
+			if(gap > largest_free){
 				largest_free = gap;
+			}
 		}
 
-		total_alloc += curr->size;
-		num_allocs++;
+		char* currentEnd = (char*)current->start + current->size;
+		size_t aBlock = current->size; 
 
-		gap_start = (char *)curr->start + curr->size;
-		curr = curr->next;
+		if(aBlock > 0){
+			total_alloc += aBlock;
+			num_allocs++;
+		}
+
+		previousEnd = currentEnd;
+		current = current->next;
 	}
 
-	// buraco final: entre o último bloco e o fim do pool
-	size_t last_gap = (size_t)(pool_end - gap_start);
-	if (last_gap > 0) {
-		total_free += last_gap;
+	size_t rBlock = (size_t)(pool + memory->total_size) - (size_t)previousEnd;
+
+	if(rBlock > 0){
+		total_free += rBlock;
 		num_fragments++;
-		if (last_gap > largest_free)
-			largest_free = last_gap;
+
+		if(total_free > largest_free){
+			largest_free = rBlock;
+		}
 	}
 
-	printf("--- Estatisticas ---\n");
+	printf("Stats:\n");
 	printf("Alocacoes ativas      : %zu\n", num_allocs);
 	printf("Memoria alocada       : %zu bytes\n", total_alloc);
 	printf("Memoria livre         : %zu bytes\n", total_free);
