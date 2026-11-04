@@ -31,7 +31,7 @@ void mymemory_cleanup(mymemory_t *memory){
 
 	allocation_t *current = memory->head;
 
-	while(current->next != NULL){
+	while(current != NULL){
 		allocation_t *next = current -> next;			
 		free(current);
 		current = next;
@@ -219,7 +219,7 @@ void mymemory_stats(mymemory_t *memory){
 		total_free += rBlock;
 		num_fragments++;
 
-		if(total_free > largest_free){
+		if(rBlock > largest_free){
 			largest_free = rBlock;
 		}
 	}
